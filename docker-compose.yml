@@ -1,0 +1,55 @@
+version: '3'
+services:
+    redis:
+        image: redis
+        ports:
+          - "6379:6379"
+
+    db:
+        image: postgres
+        ports:
+          - "5444:5432"
+        environment:
+              - POSTGRES_USER=postgres
+              - POSTGRES_PASSWORD=rucha
+              - POSTGRES_DB=energy
+        volumes:
+          - postgres_data:/var/lib/postgresql/data/
+
+    celery_worker:
+      build: .
+      command: celery -A energy worker -l info
+      volumes:
+          - .:/code
+      depends_on:
+          - db
+          - redis
+
+    celery_beat:
+      build: .
+      command: celery -A energy beat -l info
+      volumes:
+        - .:/code
+      depends_on:
+          - db
+          - redis
+#          - celery_worker
+
+    web:
+        restart: always
+        build:
+                context: .
+                dockerfile: Dockerfile
+        command: >
+            bash -c "python upload_data.py
+            && python manage.py migrate
+            && python manage.py runserver 0.0.0.0:8000"
+        volumes:
+            - .:/code
+        ports:
+            - "8001:8000"
+        depends_on:
+            - db
+            - redis
+volumes:
+  postgres_data:
