@@ -12,6 +12,6 @@ urllib3==1.25.7
 django_cron==0.5.1
 djangorestframework==3.11.0
 django-rest-swagger==2.2.0
-celery==4.2.0
+celery==5.2.2
 django-rest-auth==0.9.5
 django-allauth==0.41.0
